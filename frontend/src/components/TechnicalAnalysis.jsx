@@ -94,6 +94,57 @@ function TechnicalAnalysis() {
     return price > ma ? { signal: "Above", color: "text-green-600" } : { signal: "Below", color: "text-red-600" };
   };
 
+  const getMacdSignal = (macdData) => {
+    if (!macdData || !macdData.macd || !macdData.signal) return { signal: "N/A", color: "text-gray-600", bg: "bg-gray-100" };
+    
+    if (macdData.macd > macdData.signal) {
+      return { signal: "Bullish", color: "text-green-600", bg: "bg-green-100" };
+    } else {
+      return { signal: "Bearish", color: "text-red-600", bg: "bg-red-100" };
+    }
+  };
+
+  const getBollingerSignal = (bollingerBands) => {
+    if (!bollingerBands || !bollingerBands.upper || !bollingerBands.lower || !technicalData.currentPrice) {
+      return { 
+        signal: "Loading...", 
+        color: "text-gray-600",
+        bg: "bg-gray-50",
+        border: "border-gray-200",
+        description: "Calculating position..."
+      };
+    }
+    
+    const currentPrice = technicalData.currentPrice;
+    const position = (currentPrice - bollingerBands.lower) / (bollingerBands.upper - bollingerBands.lower);
+    
+    if (position > 0.8) {
+      return { 
+        signal: "Overbought", 
+        color: "text-red-700 bg-red-100",
+        bg: "bg-red-50",
+        border: "border-red-300",
+        description: "Price is near upper band, potential resistance level"
+      };
+    } else if (position < 0.2) {
+      return { 
+        signal: "Oversold", 
+        color: "text-green-700 bg-green-100",
+        bg: "bg-green-50",
+        border: "border-green-300",
+        description: "Price is near lower band, potential support level"
+      };
+    } else {
+      return { 
+        signal: "Normal Range", 
+        color: "text-blue-700 bg-blue-100",
+        bg: "bg-blue-50",
+        border: "border-blue-300",
+        description: "Price is within normal trading range"
+      };
+    }
+  };
+
   return (
     <div className="space-y-8">
       <motion.div
@@ -181,21 +232,34 @@ function TechnicalAnalysis() {
                   <p className="text-2xl font-bold text-gray-900">{technicalData.technicalIndicators.rsi?.toFixed(1)}</p>
                 </div>
                 
-                {/* MACD - Placeholder for future implementation */}
-                <div className="p-4 rounded-lg bg-gray-100">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-semibold text-gray-800">MACD</span>
-                    <span className="px-2 py-1 rounded text-xs font-semibold text-gray-600">
-                      Coming Soon
-                    </span>
+                {/* MACD */}
+                {technicalData.technicalIndicators?.macd ? (
+                  <div className={`p-4 rounded-lg ${getMacdSignal(technicalData.technicalIndicators.macd).bg}`}>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-semibold text-gray-800">MACD</span>
+                      <span className={`px-2 py-1 rounded text-xs font-semibold ${getMacdSignal(technicalData.technicalIndicators.macd).color}`}>
+                        {getMacdSignal(technicalData.technicalIndicators.macd).signal}
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900">{technicalData.technicalIndicators.macd.macd?.toFixed(2)}</p>
+                    <p className="text-sm text-gray-600">Signal: {technicalData.technicalIndicators.macd.signal?.toFixed(2)}</p>
                   </div>
-                  <p className="text-2xl font-bold text-gray-900">-</p>
-                </div>
+                ) : (
+                  <div className="p-4 rounded-lg bg-gray-100">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-semibold text-gray-800">MACD</span>
+                      <span className="px-2 py-1 rounded text-xs font-semibold text-gray-600">
+                        Loading...
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900">-</p>
+                  </div>
+                )}
                 
-                {/* More indicators can be added here */}
+                {/* Stochastic - Placeholder for future implementation */}
                 <div className="p-4 rounded-lg bg-gray-100">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="font-semibold text-gray-800">Bollinger Bands</span>
+                    <span className="font-semibold text-gray-800">Stochastic</span>
                     <span className="px-2 py-1 rounded text-xs font-semibold text-gray-600">
                       Coming Soon
                     </span>
@@ -242,6 +306,60 @@ function TechnicalAnalysis() {
             )}
           </div>
         </div>
+
+        {/* Bollinger Bands */}
+        {technicalData.bollingerBands && (
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Bollinger Bands</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
+                <h3 className="text-lg font-semibold text-blue-800 mb-2">Upper Band</h3>
+                <p className="text-2xl font-bold text-blue-600">
+                  ₹{technicalData.bollingerBands.upper?.toFixed(2)}
+                </p>
+                <p className="text-sm text-blue-700 mt-1">
+                  +{technicalData.currentPrice && technicalData.bollingerBands.upper ? 
+                    ((technicalData.bollingerBands.upper - technicalData.currentPrice) / technicalData.currentPrice * 100).toFixed(2) : 0}%
+                </p>
+              </div>
+              <div className="text-center p-4 rounded-lg bg-gray-50 border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Middle Band (SMA)</h3>
+                <p className="text-2xl font-bold text-gray-600">
+                  ₹{technicalData.bollingerBands.middle?.toFixed(2)}
+                </p>
+                <p className="text-sm text-gray-700 mt-1">
+                  20-period average
+                </p>
+              </div>
+              <div className="text-center p-4 rounded-lg bg-orange-50 border border-orange-200">
+                <h3 className="text-lg font-semibold text-orange-800 mb-2">Lower Band</h3>
+                <p className="text-2xl font-bold text-orange-600">
+                  ₹{technicalData.bollingerBands.lower?.toFixed(2)}
+                </p>
+                <p className="text-sm text-orange-700 mt-1">
+                  {technicalData.currentPrice && technicalData.bollingerBands.lower ? 
+                    ((technicalData.currentPrice - technicalData.bollingerBands.lower) / technicalData.bollingerBands.lower * 100).toFixed(2) : 0}%
+                </p>
+              </div>
+            </div>
+            
+            {/* Bollinger Bands Signal */}
+            <div className={`p-4 rounded-lg border-2 ${getBollingerSignal(technicalData.bollingerBands).bg} ${getBollingerSignal(technicalData.bollingerBands).border}`}>
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-semibold text-gray-800">Position Analysis</span>
+                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getBollingerSignal(technicalData.bollingerBands).color}`}>
+                  {getBollingerSignal(technicalData.bollingerBands).signal}
+                </span>
+              </div>
+              <p className="text-lg font-semibold text-gray-900">
+                Current Price: ₹{technicalData.currentPrice?.toFixed(2)}
+              </p>
+              <p className="text-sm text-gray-600 mt-1">
+                {getBollingerSignal(technicalData.bollingerBands).description}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Support & Resistance Analysis */}
         <div className="bg-white rounded-lg shadow-md p-6">
