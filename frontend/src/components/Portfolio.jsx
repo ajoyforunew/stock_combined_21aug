@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -15,7 +14,7 @@ export default function Portfolio() {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-  const res = await fetch(`${API_BASE}/portfolio`, {
+      const res = await fetch(`${API_BASE}/portfolio`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
@@ -36,7 +35,7 @@ export default function Portfolio() {
     const token = localStorage.getItem("token");
     if (!token) return setError("Not logged in");
     try {
-  const res = await fetch(`${API_BASE}/portfolio/add`, {
+      const res = await fetch(`${API_BASE}/portfolio/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -55,7 +54,7 @@ export default function Portfolio() {
   }
 
   return (
-  <div className="max-w-lg mx-auto mt-10 p-6 bg-white rounded-sm shadow-sm">
+    <div className="max-w-lg mx-auto mt-10 p-6 bg-white rounded-sm shadow-sm">
       <h2 className="text-xl font-bold mb-4">Your Portfolio</h2>
       <form onSubmit={handleAdd} className="flex gap-2 mb-4">
         <input

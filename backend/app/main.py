@@ -12,6 +12,7 @@ from .portfolio import router as portfolio_router
 from .db import Base, engine
 from .models_db import User, Portfolio
 from .api_send_email import router as email_router
+from .market_data import market_service
 
 
 
@@ -341,3 +342,130 @@ def predict(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/market-overview")
+async def get_market_overview():
+    """Get live market overview data"""
+    try:
+        data = await market_service.get_market_overview()
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch market overview: {str(e)}")
+
+
+@app.get("/api/market-sentiment")
+async def get_market_sentiment():
+    """Get live market sentiment analysis"""
+    try:
+        data = await market_service.get_market_sentiment()
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch market sentiment: {str(e)}")
+
+
+@app.get("/api/technical-analysis/{symbol}")
+async def get_technical_analysis(symbol: str):
+    """Get technical analysis for a specific stock"""
+    try:
+        # Add .NS suffix for NSE stocks if not already present
+        ticker_symbol = f"{symbol}.NS" if not symbol.endswith('.NS') else symbol
+        ticker = yf.Ticker(ticker_symbol)
+        hist = ticker.history(period="1y")  # Get 1 year data for better MA calculations
+        
+        if hist.empty:
+            raise HTTPException(status_code=404, detail=f"Stock symbol '{symbol}' not found")
+        
+        current_price = hist['Close'].iloc[-1]
+        
+        # Calculate moving averages with proper handling
+        ma20 = hist['Close'].rolling(20).mean().iloc[-1] if len(hist) >= 20 else None
+        ma50 = hist['Close'].rolling(50).mean().iloc[-1] if len(hist) >= 50 else None
+        ma200 = hist['Close'].rolling(200).mean().iloc[-1] if len(hist) >= 200 else None
+        
+        # Calculate RSI (14-period)
+        def calculate_rsi(prices, period=14):
+            delta = prices.diff()
+            gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
+            loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+            rs = gain / loss
+            rsi = 100 - (100 / (1 + rs))
+            return rsi.iloc[-1]
+        
+        rsi = calculate_rsi(hist['Close']) if len(hist) >= 14 else None
+        
+        # Calculate support/resistance levels (20-period highs/lows)
+        recent_period = min(20, len(hist))
+        recent_high = hist['High'].rolling(recent_period).max().iloc[-1]
+        recent_low = hist['Low'].rolling(recent_period).min().iloc[-1]
+        
+        # Calculate Bollinger Bands
+        bb_period = 20
+        bb_std = 2
+        if len(hist) >= bb_period:
+            sma = hist['Close'].rolling(bb_period).mean()
+            std = hist['Close'].rolling(bb_period).std()
+            bb_upper = (sma + (std * bb_std)).iloc[-1]
+            bb_lower = (sma - (std * bb_std)).iloc[-1]
+            bb_middle = sma.iloc[-1]
+        else:
+            bb_upper = bb_lower = bb_middle = None
+        
+        # Calculate MACD
+        def calculate_macd(prices):
+            ema12 = prices.ewm(span=12).mean()
+            ema26 = prices.ewm(span=26).mean()
+            macd_line = ema12 - ema26
+            signal_line = macd_line.ewm(span=9).mean()
+            histogram = macd_line - signal_line
+            return {
+                'macd': macd_line.iloc[-1],
+                'signal': signal_line.iloc[-1],
+                'histogram': histogram.iloc[-1]
+            }
+        
+        macd_data = calculate_macd(hist['Close']) if len(hist) >= 26 else None
+        
+        # Volume analysis
+        current_volume = int(hist['Volume'].iloc[-1])
+        avg_volume = int(hist['Volume'].rolling(20).mean().iloc[-1]) if len(hist) >= 20 else current_volume
+        volume_ratio = current_volume / avg_volume if avg_volume > 0 else 1
+        
+        return {
+            "symbol": symbol,
+            "currentPrice": round(float(current_price), 2),
+            "technicalIndicators": {
+                "rsi": round(float(rsi), 1) if rsi is not None else None,
+                "ma20": round(float(ma20), 2) if ma20 is not None else None,
+                "ma50": round(float(ma50), 2) if ma50 is not None else None,
+                "ma200": round(float(ma200), 2) if ma200 is not None else None,
+                "macd": {
+                    "macd": round(float(macd_data['macd']), 2) if macd_data else None,
+                    "signal": round(float(macd_data['signal']), 2) if macd_data else None,
+                    "histogram": round(float(macd_data['histogram']), 2) if macd_data else None
+                } if macd_data else None
+            },
+            "supportResistance": {
+                "support": round(float(recent_low), 2),
+                "resistance": round(float(recent_high), 2)
+            },
+            "bollingerBands": {
+                "upper": round(float(bb_upper), 2) if bb_upper is not None else None,
+                "middle": round(float(bb_middle), 2) if bb_middle is not None else None,
+                "lower": round(float(bb_lower), 2) if bb_lower is not None else None
+            } if bb_upper is not None else None,
+            "volume": current_volume,
+            "volumeAnalysis": {
+                "currentVolume": current_volume,
+                "avgVolume": avg_volume,
+                "volumeRatio": round(volume_ratio, 2)
+            },
+            "priceChange": {
+                "change": round(float(current_price - hist['Close'].iloc[-2]), 2) if len(hist) >= 2 else 0,
+                "changePercent": round(float((current_price - hist['Close'].iloc[-2]) / hist['Close'].iloc[-2] * 100), 2) if len(hist) >= 2 else 0
+            },
+            "lastUpdated": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch technical analysis: {str(e)}")

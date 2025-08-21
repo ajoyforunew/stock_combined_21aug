@@ -18,3 +18,4 @@ sqlalchemy
 fastapi-jwt-auth
 bcrypt
 pydantic[email]
+aiohttp

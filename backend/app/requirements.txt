@@ -10,6 +10,7 @@ ta
 python-multipart
 redis
 aioredis
+aiohttp
 python-jose
 passlib
 pydantic<2.0.0
