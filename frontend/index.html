@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Meta Essentials -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="text-size-adjust" content="100%" />
+    <!--
+      Security/Performance recommendations:
+      - Use <meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self'"> instead of X-Frame-Options.
+      - Prefer Cache-Control headers over Expires for caching.
+      - Remove x-xss-protection header (deprecated).
+      - Use cache-busting for static resources (handled by Vite).
+    -->
+    <meta name="description" content="AI-powered stock price prediction and analysis platform." />
+    <meta name="keywords" content="stock prediction, share price, AI, machine learning, finance" />
+    <meta name="author" content="Your Name or Company" />
+
+    <!-- Open Graph for Social Sharing -->
+    <meta property="og:title" content="Stock Predictor" />
+    <meta property="og:description" content="Get AI-powered share price predictions with real-time charts." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/logo.png" />
+    <meta property="og:url" content="https://yourwebsite.com" />
+
+    <!-- Title -->
+    <title>Stock Predictor</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+
+    <!-- Global Styles -->
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Roboto', sans-serif;
+        background-color: #f5f7fa;
+        color: #333;
+      }
+
+      #root {
+        min-height: 100vh;
+      }
+
+      /* Loading Screen */
+      #loading-screen {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(120deg, #4f9eed, #6dd5ed);
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        flex-direction: column;
+      }
+
+      .spinner {
+        border: 6px solid rgba(255, 255, 255, 0.3);
+        border-top: 6px solid white;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 15px;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Loading until React mounts -->
+    <div id="loading-screen">
+      <div class="spinner"></div>
+      Loading Stock Predictor...
+    </div>
+
+    <!-- React App -->
+    <div id="root" style="display: none;"></div>
+
+    <!-- React Entry -->
+    <script type="module">
+      import('/src/main.jsx').then(() => {
+        document.getElementById('loading-screen').style.display = 'none';
+        document.getElementById('root').style.display = 'block';
+      });
+    </script>
+  </body>
+</html>

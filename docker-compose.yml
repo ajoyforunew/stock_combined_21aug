@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  frontend:
+    build: ./frontend
+    container_name: stock_predict_frontend
+    ports:
+      - "3000:80"    # host:container
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend
+    container_name: stock_predict_backend
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+    ports:
+      - "8000:8001"  # host:container
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    container_name: stock_predict_redis
+    ports:
+      - "6379:6379"
