@@ -5,27 +5,14 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 function MarketSentiment() {
   const [sentimentData, setSentimentData] = useState({
-    overall: { score: 62, label: "Neutral-Bullish", color: "text-green-600" },
-    fear_greed: { score: 58, label: "Neutral", color: "text-yellow-600" },
-    volatility: { score: 28, label: "Low", color: "text-green-600" }
+    overall: { score: 0, label: "Loading...", color: "text-gray-600" },
+    fear_greed: { score: 0, label: "Loading...", color: "text-gray-600" },
+    volatility: { score: 0, label: "Loading...", color: "text-gray-600" }
   });
 
-  const [newsHeadlines, setNewsHeadlines] = useState([
-    { title: "Indian markets gain on positive global cues and FII inflows", sentiment: "positive", score: 72 },
-    { title: "Banking sector shows resilience amid rate cut expectations", sentiment: "positive", score: 68 },
-    { title: "IT stocks face pressure due to US recession fears", sentiment: "negative", score: 38 },
-    { title: "Auto sector recovers on festive season demand outlook", sentiment: "positive", score: 65 },
-    { title: "Metal stocks mixed on China demand concerns", sentiment: "neutral", score: 52 }
-  ]);
+  const [newsHeadlines, setNewsHeadlines] = useState([]);
 
-  const [sectorSentiment, setSectorSentiment] = useState([
-    { sector: "Banking", sentiment: 64, trend: "up" },
-    { sector: "IT", sentiment: 42, trend: "down" },
-    { sector: "Auto", sentiment: 58, trend: "neutral" },
-    { sector: "Pharma", sentiment: 56, trend: "neutral" },
-    { sector: "Energy", sentiment: 48, trend: "down" },
-    { sector: "FMCG", sentiment: 61, trend: "up" }
-  ]);
+  const [sectorSentiment, setSectorSentiment] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);

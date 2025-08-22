@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 
 from .auth import router as auth_router
 from .portfolio import router as portfolio_router
+from .enhanced_portfolio import router as enhanced_portfolio_router
 from .db import Base, engine
 from .models_db import User, Portfolio
 from .api_send_email import router as email_router
@@ -207,7 +208,7 @@ def next_trading_day(d: pd.Timestamp) -> pd.Timestamp:
 Base.metadata.create_all(bind=engine)
 
 app.include_router(auth_router)
-app.include_router(portfolio_router)
+app.include_router(enhanced_portfolio_router, prefix="/api", tags=["Enhanced Portfolio"])
 
 @app.get("/predict")
 def predict(

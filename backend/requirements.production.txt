@@ -1,0 +1,50 @@
+# Production Requirements with Performance Optimizations
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+uvloop==0.19.0  # Better async performance
+gunicorn==21.2.0  # WSGI server for production
+redis==5.0.1  # Caching and session storage
+psycopg2-binary==2.9.9  # PostgreSQL adapter
+sqlalchemy==2.0.23
+alembic==1.12.1  # Database migrations
+
+# Enhanced monitoring and metrics
+prometheus-fastapi-instrumentator==6.1.0
+prometheus-client==0.19.0
+
+# Market data and calculations
+yfinance==0.2.28
+pandas==2.1.4
+numpy==1.25.2
+aiohttp==3.9.1
+requests==2.31.0
+
+# Authentication and security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# Email functionality
+fastapi-mail==1.4.1
+jinja2==3.1.2
+
+# Rate limiting and security
+slowapi==0.1.9
+python-limiter==3.1.1
+
+# Database connection pooling
+asyncpg==0.29.0  # Async PostgreSQL driver
+sqlalchemy[asyncio]==2.0.23
+
+# Optimization and caching
+orjson==3.9.10  # Faster JSON serialization
+aiocache==0.12.2  # Async caching
+
+# Testing (for development)
+pytest==7.4.3
+pytest-asyncio==0.21.1
+httpx==0.25.2
+
+# Production utilities
+python-dotenv==1.0.0
+pydantic-settings==2.1.0

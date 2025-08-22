@@ -6,20 +6,20 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 function TechnicalAnalysis() {
   const [selectedStock, setSelectedStock] = useState("RELIANCE");
   const [technicalData, setTechnicalData] = useState({
-    currentPrice: 2845.50,
+    currentPrice: 0,
     technicalIndicators: {
-      rsi: 68.5,
-      ma20: 2820.5,
-      ma50: 2795.8,
-      ma200: 2650.2,
+      rsi: 0,
+      ma20: 0,
+      ma50: 0,
+      ma200: 0,
       macd: null
     },
     supportResistance: {
-      support: 2800.0,
-      resistance: 2900.0
+      support: 0,
+      resistance: 0
     },
     bollingerBands: null,
-    volume: 1250000
+    volume: 0
   });
 
   const [loading, setLoading] = useState(false);
